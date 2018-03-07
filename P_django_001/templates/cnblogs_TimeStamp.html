@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<!-- saved from url=(0033)http://www.cnblogs.com/AdaminXie/ -->
+<html lang="zh-cn"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TimeStamp - 博客园</title>
+<link type="text/css" rel="stylesheet" href="./cnblogs_TimeStamp_files/blog-common.css">
+<link id="MainCss" type="text/css" rel="stylesheet" href="./cnblogs_TimeStamp_files/bundle-SimpleMemory.css">
+<link type="text/css" rel="stylesheet" href="./cnblogs_TimeStamp_files/350798.css">
+<link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="./cnblogs_TimeStamp_files/bundle-SimpleMemory-mobile.css">
+<link title="RSS" type="application/rss+xml" rel="alternate" href="http://www.cnblogs.com/AdaminXie/rss">
+<link title="RSD" type="application/rsd+xml" rel="EditURI" href="http://www.cnblogs.com/AdaminXie/rsd.xml">
+<link type="application/wlwmanifest+xml" rel="wlwmanifest" href="http://www.cnblogs.com/AdaminXie/wlwmanifest.xml">
+<script async="" src="./cnblogs_TimeStamp_files/analytics.js"></script><script src="./cnblogs_TimeStamp_files/jquery-2.2.0.min.js"></script><style type="text/css" abt="234"></style>
+<script type="text/javascript">var currentBlogApp = 'AdaminXie', cb_enable_mathjax=false;var isLogined=true;</script>
+<script src="./cnblogs_TimeStamp_files/blog-common.js" type="text/javascript"></script>
+<script>//console.log('a')
+</script><script>doAdblock();
+function doAdblock(){
+    (function() {
+        function A() {}
+        A.prototype = {
+            rules: {
+                'pps_pps': {
+                    'find': /^http:\/\/www\.iqiyi\.com\/player\/cupid\/common\/pps_flvplay_s\.swf/,
+                    'replace': 'http://swf.adtchrome.com/pps_20140420.swf'
+                },
+                '17173_in':{
+                    'find':/http:\/\/f\.v\.17173cdn\.com\/(\d+\/)?flash\/PreloaderFile(Customer)?\.swf/,
+                    'replace':"http://swf.adtchrome.com/17173_in_20150522.swf"
+                },
+                '17173_out':{
+                    'find':/http:\/\/f\.v\.17173cdn\.com\/(\d+\/)?flash\/PreloaderFileFirstpage\.swf/,
+                    'replace':"http://swf.adtchrome.com/17173_out_20150522.swf"
+                },
+                '17173_live':{
+                    'find':/http:\/\/f\.v\.17173cdn\.com\/(\d+\/)?flash\/Player_stream(_firstpage)?\.swf/,
+                    'replace':"http://swf.adtchrome.com/17173_stream_20150522.swf"
+                },
+                '17173_live_out':{
+                    'find':/http:\/\/f\.v\.17173cdn\.com\/(\d+\/)?flash\/Player_stream_(custom)?Out\.swf/,
+                    'replace':"http://swf.adtchrome.com/17173.out.Live.swf"
+                }
+            },
+            _done: null,
+            get done() {
+                if(!this._done) {
+                    this._done = new Array();
+                }
+                return this._done;
+            },
+            addAnimations: function() {
+                var style = document.createElement('style');
+                style.type = 'text/css';
+                style.innerHTML = 'object,embed{\
+                -webkit-animation-duration:.001s;-webkit-animation-name:playerInserted;\
+                -ms-animation-duration:.001s;-ms-animation-name:playerInserted;\
+                -o-animation-duration:.001s;-o-animation-name:playerInserted;\
+                animation-duration:.001s;animation-name:playerInserted;}\
+                @-webkit-keyframes playerInserted{from{opacity:0.99;}to{opacity:1;}}\
+                @-ms-keyframes playerInserted{from{opacity:0.99;}to{opacity:1;}}\
+                @-o-keyframes playerInserted{from{opacity:0.99;}to{opacity:1;}}\
+                @keyframes playerInserted{from{opacity:0.99;}to{opacity:1;}}';
+                document.getElementsByTagName('head')[0].appendChild(style);
+            },
+            animationsHandler: function(e) {
+                if(e.animationName === 'playerInserted') {
+                    this.replace(e.target);
+                }
+            },
+            replace: function(elem) {
+                if (/http:\/\/v.youku.com\/v_show\/.*/.test(window.location.href)){
+                    var tag = document.getElementById("playerBox").getAttribute("player")
+                    if (tag == "adt"){
+                        console.log("adt adv")
+                        return;
+                    }
+                }
+                if(this.done.indexOf(elem) != -1) return;
+                this.done.push(elem);
+                var player = elem.data || elem.src;
+                if(!player) return;
+                var i, find, replace = false;
+                for(i in this.rules) {
+                    find = this.rules[i]['find'];
+                    if(find.test(player)) {
+                        replace = this.rules[i]['replace'];
+                        if('function' === typeof this.rules[i]['preHandle']) {
+                            this.rules[i]['preHandle'].bind(this, elem, find, replace, player)();
+                        }else{
+                            this.reallyReplace.bind(this, elem, find, replace)();
+                        }
+                        break;
+                    }
+                }
+            },
+            reallyReplace: function(elem, find, replace) {
+                elem.data && (elem.data = elem.data.replace(find, replace)) || elem.src && ((elem.src = elem.src.replace(find, replace)) && (elem.style.display = 'block'));
+                var b = elem.querySelector("param[name='movie']");
+                this.reloadPlugin(elem);
+            },
+            reloadPlugin: function(elem) {
+                var nextSibling = elem.nextSibling;
+                var parentNode = elem.parentNode;
+                parentNode.removeChild(elem);
+                var newElem = elem.cloneNode(true);
+                this.done.push(newElem);
+                if(nextSibling) {
+                    parentNode.insertBefore(newElem, nextSibling);
+                } else {
+                    parentNode.appendChild(newElem);
+                }
+            },
+            init: function() {
+                var handler = this.animationsHandler.bind(this);
+                document.body.addEventListener('webkitAnimationStart', handler, false);
+                document.body.addEventListener('msAnimationStart', handler, false);
+                document.body.addEventListener('oAnimationStart', handler, false);
+                document.body.addEventListener('animationstart', handler, false);
+                this.addAnimations();
+            }
+        };
+        new A().init();
+    })();
+}
+// 20140730
+(function cnbeta() {
+    if (document.URL.indexOf('cnbeta.com') >= 0) {
+        var elms = document.body.querySelectorAll("p>embed");
+        Array.prototype.forEach.call(elms, function(elm) {
+            elm.style.marginLeft = "0px";
+        });
+    }
+})();
+//baidu
+if(document.URL.indexOf('www.baidu.com') >= 0){
+    if(document && document.getElementsByTagName && document.getElementById && document.body){
+        var aa = function(){
+            var all = document.body.querySelectorAll("#content_left div,#content_left table");
+            for(var i = 0; i < all.length; i++){
+                if(/display:\s?(table|block)\s!important/.test(all[i].getAttribute("style"))){all[i].style.display= "none";all[i].style.visibility='hidden';}
+            }
+            all = document.body.querySelectorAll('.result.c-container[id="1"]');
+            //if(all.length == 1) return;
+            for(var i = 0; i < all.length; i++){
+                if(all[i].innerHTML && all[i].innerHTML.indexOf('广告')>-1){
+                    all[i].style.display= "none";all[i].style.visibility='hidden';
+                }
+            }
+        }
+        aa();
+        document.getElementById('wrapper_wrapper').addEventListener('DOMSubtreeModified',aa)
+    };
+}
+// 20140922
+(function kill_360() {
+    if (document.URL.indexOf('so.com') >= 0) {
+        document.getElementById("e_idea_pp").style.display = none;
+    }
+})();
+if (document.URL.indexOf("tv.sohu.com") >= 0){
+    if (document.cookie.indexOf("fee_status=true")==-1){document.cookie='fee_status=true'};
+}
+if (document.URL.indexOf("56.com") >= 0){
+    if (document.cookie.indexOf("fee_status=true")==-1){document.cookie='fee_status=true'};
+}
+if (document.URL.indexOf("iqiyi.com") >= 0){
+    if (document.cookie.indexOf("player_forcedType=h5_VOD")==-1){
+        document.cookie='player_forcedType=h5_VOD'
+        if(localStorage.reloadTime && Date.now() - parseInt(localStorage.reloadTime)<60000){
+            console.log('no reload')
+        }else{
+            location.reload()
+            localStorage.reloadTime = Date.now();
+        }
+    }
+}
+</script><style type="text/css">object,embed{                -webkit-animation-duration:.001s;-webkit-animation-name:playerInserted;                -ms-animation-duration:.001s;-ms-animation-name:playerInserted;                -o-animation-duration:.001s;-o-animation-name:playerInserted;                animation-duration:.001s;animation-name:playerInserted;}                @-webkit-keyframes playerInserted{from{opacity:0.99;}to{opacity:1;}}                @-ms-keyframes playerInserted{from{opacity:0.99;}to{opacity:1;}}                @-o-keyframes playerInserted{from{opacity:0.99;}to{opacity:1;}}                @keyframes playerInserted{from{opacity:0.99;}to{opacity:1;}}</style></head>
+<body>
+<a name="top"></a>
+<!--PageBeginHtml Block Begin-->
+<h1 class="postTitle">
+<a id="cb_post_title_url" class="menu" href="https://github.com/coneypo"> &nbsp;&nbsp;&nbsp;&nbsp;My GitHub</a>
+</h1>
+<!--PageBeginHtml Block End-->
+
+<!--done-->
+<div id="home">
+<div id="header">
+	<div id="blogTitle">
+	<a id="lnkBlogLogo" href="http://www.cnblogs.com/AdaminXie/"><img id="blogLogo" src="./cnblogs_TimeStamp_files/logo.gif" alt="返回主页"></a>			
+		
+<!--done-->
+<h1><a id="Header1_HeaderTitle" class="headermaintitle" href="http://www.cnblogs.com/AdaminXie/">TimeStamp</a></h1>
+<h2>哈哈哈哈哈</h2>
+
+
+
+		
+	</div><!--end: blogTitle 博客的标题和副标题 -->
+	<div id="navigator">
+		
+<ul id="navList">
+<li><a id="blog_nav_sitehome" class="menu" href="http://www.cnblogs.com/">博客园</a></li>
+<li><a id="blog_nav_myhome" class="menu" href="http://www.cnblogs.com/AdaminXie/">首页</a></li>
+<li><a id="blog_nav_newpost" class="menu" rel="nofollow" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">新随笔</a></li>
+<li><a id="blog_nav_contact" class="menu" rel="nofollow" href="https://msg.cnblogs.com/send/TimeStamp">联系</a></li>
+<li><a id="blog_nav_rss" class="menu" href="http://www.cnblogs.com/AdaminXie/rss">订阅</a>
+<!--<a id="blog_nav_rss_image" class="aHeaderXML" href="http://www.cnblogs.com/AdaminXie/rss"><img src="//www.cnblogs.com/images/xml.gif" alt="订阅" /></a>--></li>
+<li><a id="blog_nav_admin" class="menu" rel="nofollow" href="https://i.cnblogs.com/">管理</a></li>
+</ul>
+		<div class="blogStats">
+			
+			<div id="blog_stats">
+<span id="stats_post_count">随笔 - 11&nbsp; </span>
+<span id="stats_article_count">文章 - 0&nbsp; </span>
+<span id="stats-comment_count">评论 - 9</span>
+</div>
+			
+		</div><!--end: blogStats -->
+	</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+
+<div id="main">
+	<div id="mainContent">
+	<div class="forFlow">
+		
+
+<!--done-->
+
+
+<div class="day">
+	<div class="dayTitle">
+		<a id="homepage1_HomePageDays_DaysList_ctl00_ImageLink" href="http://www.cnblogs.com/AdaminXie/archive/2018/02/26.html">2018年2月26日</a>				  
+	</div>
+
+	
+			<div class="postTitle">
+				<a id="homepage1_HomePageDays_DaysList_ctl00_DayList_TitleUrl_0" class="postTitle2" href="http://www.cnblogs.com/AdaminXie/p/8472743.html">Python 3 利用 Dlib 19.7 实现摄像头人脸检测特征点标定</a>
+			</div>
+			<div class="postCon"><div class="c_b_p_desc">摘要: 调用摄像头，进行实时人脸检测和特征点标定<a href="http://www.cnblogs.com/AdaminXie/p/8472743.html" class="c_b_p_desc_readmore">阅读全文</a></div></div>
+			<div class="clear"></div>
+			<div class="postDesc">posted @ 2018-02-26 13:36 TimeStamp 阅读(948) 评论(3)  <a href="https://i.cnblogs.com/EditPosts.aspx?postid=8472743" rel="nofollow">编辑</a></div>
+			<div class="clear"></div>
+		
+</div>
+
+
+<div class="day">
+	<div class="dayTitle">
+		<a id="homepage1_HomePageDays_DaysList_ctl01_ImageLink" href="http://www.cnblogs.com/AdaminXie/archive/2018/01/30.html">2018年1月30日</a>				  
+	</div>
+
+	
+			<div class="postTitle">
+				<a id="homepage1_HomePageDays_DaysList_ctl01_DayList_TitleUrl_0" class="postTitle2" href="http://www.cnblogs.com/AdaminXie/p/8379749.html">Python 3 生成手写体数字数据集</a>
+			</div>
+			<div class="postCon"><div class="c_b_p_desc">摘要: 介绍了手写体数字的生成方法，可以借此自己构建数据集<a href="http://www.cnblogs.com/AdaminXie/p/8379749.html" class="c_b_p_desc_readmore">阅读全文</a></div></div>
+			<div class="clear"></div>
+			<div class="postDesc">posted @ 2018-01-30 13:01 TimeStamp 阅读(835) 评论(1)  <a href="https://i.cnblogs.com/EditPosts.aspx?postid=8379749" rel="nofollow">编辑</a></div>
+			<div class="clear"></div>
+		
+</div>
+
+
+<div class="day">
+	<div class="dayTitle">
+		<a id="homepage1_HomePageDays_DaysList_ctl02_ImageLink" href="http://www.cnblogs.com/AdaminXie/archive/2018/01/28.html">2018年1月28日</a>				  
+	</div>
+
+	
+			<div class="postTitle">
+				<a id="homepage1_HomePageDays_DaysList_ctl02_DayList_TitleUrl_0" class="postTitle2" href="http://www.cnblogs.com/AdaminXie/p/8367348.html">Python 3 利用 Dlib 19.7 和 sklearn机器学习模型 实现人脸笑脸检测</a>
+			</div>
+			<div class="postCon"><div class="c_b_p_desc">摘要: 利用 dlib 和 sklearn 机器学习模型，训练和测试笑脸检测模型<a href="http://www.cnblogs.com/AdaminXie/p/8367348.html" class="c_b_p_desc_readmore">阅读全文</a></div></div>
+			<div class="clear"></div>
+			<div class="postDesc">posted @ 2018-01-28 13:56 TimeStamp 阅读(603) 评论(0)  <a href="https://i.cnblogs.com/EditPosts.aspx?postid=8367348" rel="nofollow">编辑</a></div>
+			<div class="clear"></div>
+		
+</div>
+
+
+<div class="day">
+	<div class="dayTitle">
+		<a id="homepage1_HomePageDays_DaysList_ctl03_ImageLink" href="http://www.cnblogs.com/AdaminXie/archive/2018/01/24.html">2018年1月24日</a>				  
+	</div>
+
+	
+			<div class="postTitle">
+				<a id="homepage1_HomePageDays_DaysList_ctl03_DayList_TitleUrl_0" class="postTitle2" href="http://www.cnblogs.com/AdaminXie/p/8339863.html">Python 3 利用 Dlib 19.7 实现人脸检测和剪切</a>
+			</div>
+			<div class="postCon"><div class="c_b_p_desc">摘要: 基于dlib进行人脸检测和剪切<a href="http://www.cnblogs.com/AdaminXie/p/8339863.html" class="c_b_p_desc_readmore">阅读全文</a></div></div>
+			<div class="clear"></div>
+			<div class="postDesc">posted @ 2018-01-24 08:46 TimeStamp 阅读(1144) 评论(5)  <a href="https://i.cnblogs.com/EditPosts.aspx?postid=8339863" rel="nofollow">编辑</a></div>
+			<div class="clear"></div>
+		
+</div>
+
+
+<div class="day">
+	<div class="dayTitle">
+		<a id="homepage1_HomePageDays_DaysList_ctl04_ImageLink" href="http://www.cnblogs.com/AdaminXie/archive/2018/01/09.html">2018年1月9日</a>				  
+	</div>
+
+	
+			<div class="postTitle">
+				<a id="homepage1_HomePageDays_DaysList_ctl04_DayList_TitleUrl_0" class="postTitle2" href="http://www.cnblogs.com/AdaminXie/p/8249858.html">Python 3 利用机器学习模型 进行手写体数字检测</a>
+			</div>
+			<div class="postCon"><div class="c_b_p_desc">摘要: 介绍了一个从数据集的建立，特征提取，机器学习建模和性能分析的完整项目过程<a href="http://www.cnblogs.com/AdaminXie/p/8249858.html" class="c_b_p_desc_readmore">阅读全文</a></div></div>
+			<div class="clear"></div>
+			<div class="postDesc">posted @ 2018-01-09 09:38 TimeStamp 阅读(298) 评论(0)  <a href="https://i.cnblogs.com/EditPosts.aspx?postid=8249858" rel="nofollow">编辑</a></div>
+			<div class="clear"></div>
+		
+</div>
+
+
+<div class="day">
+	<div class="dayTitle">
+		<a id="homepage1_HomePageDays_DaysList_ctl05_ImageLink" href="http://www.cnblogs.com/AdaminXie/archive/2017/12/28.html">2017年12月28日</a>				  
+	</div>
+
+	
+			<div class="postTitle">
+				<a id="homepage1_HomePageDays_DaysList_ctl05_DayList_TitleUrl_0" class="postTitle2" href="http://www.cnblogs.com/AdaminXie/p/8137580.html">Python 3 利用 Dlib 19.7 实现人脸68个特征点的标定</a>
+			</div>
+			<div class="postCon"><div class="c_b_p_desc">摘要: python 利用 dlib 进行人脸的68个特征点标定<a href="http://www.cnblogs.com/AdaminXie/p/8137580.html" class="c_b_p_desc_readmore">阅读全文</a></div></div>
+			<div class="clear"></div>
+			<div class="postDesc">posted @ 2017-12-28 20:09 TimeStamp 阅读(322) 评论(0)  <a href="https://i.cnblogs.com/EditPosts.aspx?postid=8137580" rel="nofollow">编辑</a></div>
+			<div class="clear"></div>
+		
+</div>
+
+
+<div class="day">
+	<div class="dayTitle">
+		<a id="homepage1_HomePageDays_DaysList_ctl06_ImageLink" href="http://www.cnblogs.com/AdaminXie/archive/2017/11/27.html">2017年11月27日</a>				  
+	</div>
+
+	
+			<div class="postTitle">
+				<a id="homepage1_HomePageDays_DaysList_ctl06_DayList_TitleUrl_0" class="postTitle2" href="http://www.cnblogs.com/AdaminXie/p/7905888.html">Python 3 利用 Dlib 19.7 进行人脸检测</a>
+			</div>
+			<div class="postCon"><div class="c_b_p_desc">摘要: 介绍dlib例程中的 face_detector.py 和 face_landmark_detection.py 的使用<a href="http://www.cnblogs.com/AdaminXie/p/7905888.html" class="c_b_p_desc_readmore">阅读全文</a></div></div>
+			<div class="clear"></div>
+			<div class="postDesc">posted @ 2017-11-27 20:20 TimeStamp 阅读(1287) 评论(0)  <a href="https://i.cnblogs.com/EditPosts.aspx?postid=7905888" rel="nofollow">编辑</a></div>
+			<div class="clear"></div>
+		
+</div>
+
+
+<div class="day">
+	<div class="dayTitle">
+		<a id="homepage1_HomePageDays_DaysList_ctl07_ImageLink" href="http://www.cnblogs.com/AdaminXie/archive/2017/11/20.html">2017年11月20日</a>				  
+	</div>
+
+	
+			<div class="postTitle">
+				<a id="homepage1_HomePageDays_DaysList_ctl07_DayList_TitleUrl_0" class="postTitle2" href="http://www.cnblogs.com/AdaminXie/p/7868446.html">IP地址简介</a>
+			</div>
+			<div class="postCon"><div class="c_b_p_desc">摘要: IP地址简介<a href="http://www.cnblogs.com/AdaminXie/p/7868446.html" class="c_b_p_desc_readmore">阅读全文</a></div></div>
+			<div class="clear"></div>
+			<div class="postDesc">posted @ 2017-11-20 21:52 TimeStamp 阅读(50) 评论(0)  <a href="https://i.cnblogs.com/EditPosts.aspx?postid=7868446" rel="nofollow">编辑</a></div>
+			<div class="clear"></div>
+		
+</div>
+
+
+<div class="day">
+	<div class="dayTitle">
+		<a id="homepage1_HomePageDays_DaysList_ctl08_ImageLink" href="http://www.cnblogs.com/AdaminXie/archive/2017/05/07.html">2017年5月7日</a>				  
+	</div>
+
+	
+			<div class="postTitle">
+				<a id="homepage1_HomePageDays_DaysList_ctl08_DayList_TitleUrl_0" class="postTitle2" href="http://www.cnblogs.com/AdaminXie/p/6821956.html">光网络笔记1</a>
+			</div>
+			<div class="postCon"><div class="c_b_p_desc">摘要: 光网络笔记<a href="http://www.cnblogs.com/AdaminXie/p/6821956.html" class="c_b_p_desc_readmore">阅读全文</a></div></div>
+			<div class="clear"></div>
+			<div class="postDesc">posted @ 2017-05-07 19:43 TimeStamp 阅读(65) 评论(0)  <a href="https://i.cnblogs.com/EditPosts.aspx?postid=6821956" rel="nofollow">编辑</a></div>
+			<div class="clear"></div>
+		
+</div>
+
+
+<div class="day">
+	<div class="dayTitle">
+		<a id="homepage1_HomePageDays_DaysList_ctl09_ImageLink" href="http://www.cnblogs.com/AdaminXie/archive/2017/04/27.html">2017年4月27日</a>				  
+	</div>
+
+	
+			<div class="postTitle">
+				<a id="homepage1_HomePageDays_DaysList_ctl09_DayList_TitleUrl_0" class="postTitle2" href="http://www.cnblogs.com/AdaminXie/p/6771701.html">IEEE1588 verision2 报文介绍</a>
+			</div>
+			<div class="postCon"><div class="c_b_p_desc">摘要: IEEE1588 verision2 报文结构和封装方式介绍<a href="http://www.cnblogs.com/AdaminXie/p/6771701.html" class="c_b_p_desc_readmore">阅读全文</a></div></div>
+			<div class="clear"></div>
+			<div class="postDesc">posted @ 2017-04-27 00:06 TimeStamp 阅读(665) 评论(0)  <a href="https://i.cnblogs.com/EditPosts.aspx?postid=6771701" rel="nofollow">编辑</a></div>
+			<div class="clear"></div>
+		
+</div>
+
+<div class="topicListFooter"><div id="nav_next_page"><a href="http://www.cnblogs.com/AdaminXie/default.html?page=2">下一页</a></div></div>
+
+
+	</div><!--end: forFlow -->
+	</div><!--end: mainContent 主体内容容器-->
+
+	<div id="sideBar">
+		<div id="sideBarMain">
+			
+<!--done-->
+<div class="newsItem">
+<h3 class="catListTitle">公告</h3>
+	<div id="blog-news"><a href="https://info.flagcounter.com/mCnQ"><img src="./cnblogs_TimeStamp_files/saved_resource" alt="Flag Counter" border="0"></a><div id="profile_block">昵称：<a href="https://home.cnblogs.com/u/AdaminXie/">TimeStamp</a><br>园龄：<a href="https://home.cnblogs.com/u/AdaminXie/" title="入园时间：2017-04-23">10个月</a><br>粉丝：<a href="https://home.cnblogs.com/u/AdaminXie/followers/">18</a><br>关注：<a href="https://home.cnblogs.com/u/AdaminXie/followees/">1</a><div id="p_b_follow"></div><script>getFollowStatus('70f2443b-1a28-e711-9fc1-ac853d9f53cc')</script></div></div><script type="text/javascript">loadBlogNews();</script>
+</div>
+
+			<div id="blog-calendar" style=""><table id="blogCalendar" class="Cal" cellspacing="0" cellpadding="0" title="Calendar">
+	<tbody><tr><td colspan="7"><table class="CalTitle" cellspacing="0">
+		<tbody><tr><td class="CalNextPrev"><a href="javascript:void(0);" onclick="loadBlogCalendar(&#39;2018/02/01&#39;);return false;">&lt;</a></td><td align="center">2018年3月</td><td class="CalNextPrev" align="right"><a href="javascript:void(0);" onclick="loadBlogCalendar(&#39;2018/04/01&#39;);return false;">&gt;</a></td></tr>
+	</tbody></table></td></tr><tr><th class="CalDayHeader" align="center" abbr="日" scope="col">日</th><th class="CalDayHeader" align="center" abbr="一" scope="col">一</th><th class="CalDayHeader" align="center" abbr="二" scope="col">二</th><th class="CalDayHeader" align="center" abbr="三" scope="col">三</th><th class="CalDayHeader" align="center" abbr="四" scope="col">四</th><th class="CalDayHeader" align="center" abbr="五" scope="col">五</th><th class="CalDayHeader" align="center" abbr="六" scope="col">六</th></tr><tr><td class="CalOtherMonthDay" align="center">25</td><td class="CalOtherMonthDay" align="center">26</td><td class="CalOtherMonthDay" align="center">27</td><td class="CalOtherMonthDay" align="center">28</td><td align="center">1</td><td align="center">2</td><td class="CalWeekendDay" align="center">3</td></tr><tr><td class="CalWeekendDay" align="center">4</td><td align="center">5</td><td align="center">6</td><td class="CalTodayDay" align="center">7</td><td align="center">8</td><td align="center">9</td><td class="CalWeekendDay" align="center">10</td></tr><tr><td class="CalWeekendDay" align="center">11</td><td align="center">12</td><td align="center">13</td><td align="center">14</td><td align="center">15</td><td align="center">16</td><td class="CalWeekendDay" align="center">17</td></tr><tr><td class="CalWeekendDay" align="center">18</td><td align="center">19</td><td align="center">20</td><td align="center">21</td><td align="center">22</td><td align="center">23</td><td class="CalWeekendDay" align="center">24</td></tr><tr><td class="CalWeekendDay" align="center">25</td><td align="center">26</td><td align="center">27</td><td align="center">28</td><td align="center">29</td><td align="center">30</td><td class="CalWeekendDay" align="center">31</td></tr><tr><td class="CalOtherMonthDay" align="center">1</td><td class="CalOtherMonthDay" align="center">2</td><td class="CalOtherMonthDay" align="center">3</td><td class="CalOtherMonthDay" align="center">4</td><td class="CalOtherMonthDay" align="center">5</td><td class="CalOtherMonthDay" align="center">6</td><td class="CalOtherMonthDay" align="center">7</td></tr>
+</tbody></table></div><script type="text/javascript">loadBlogDefaultCalendar();</script>
+			
+			<div id="leftcontentcontainer">
+				<div id="blog-sidecolumn"><div id="sidebar_search" class="sidebar-block">
+<div id="sidebar_search" class="mySearch">
+<h3 class="catListTitle">搜索</h3>
+<div id="sidebar_search_box">
+<div id="widget_my_zzk" class="div_my_zzk"><input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="input_my_zzk">&nbsp;<input onclick="zzk_go()" type="button" value="找找看" id="btnZzk" class="btn_my_zzk"></div>
+<div id="widget_my_google" class="div_my_zzk"><input type="text" name="google_q" id="google_q" onkeydown="return google_go_enter(event)" class="input_my_zzk">&nbsp;<input onclick="google_go()" type="button" value="谷歌搜索" class="btn_my_zzk"></div>
+</div>
+</div>
+
+</div><div id="sidebar_shortcut" class="sidebar-block">
+<div class="catListLink">
+<h3 class="catListTitle">常用链接</h3>
+<ul>
+<li><a href="http://www.cnblogs.com/AdaminXie/p/" title="我的博客的随笔列表">我的随笔</a></li><li><a href="http://www.cnblogs.com/AdaminXie/MyComments.html" title="我发表过的评论列表">我的评论</a></li><li><a href="http://www.cnblogs.com/AdaminXie/OtherPosts.html" title="我评论过的随笔列表">我的参与</a></li><li><a href="http://www.cnblogs.com/AdaminXie/RecentComments.html" title="我的博客的评论列表">最新评论</a></li><li><a href="http://www.cnblogs.com/AdaminXie/tag/" title="我的博客的标签列表">我的标签</a></li>
+</ul>
+<div id="itemListLin_con" style="display:none;">
+<ul>
+
+</ul>
+</div>
+</div></div><div id="sidebar_toptags" class="sidebar-block">
+<div class="catListTag">
+<h3 class="catListTitle">我的标签</h3>
+<ul>
+<li><a href="http://www.cnblogs.com/AdaminXie/tag/python/">python</a>(6)</li><li><a href="http://www.cnblogs.com/AdaminXie/tag/dlib/">dlib</a>(5)</li><li><a href="http://www.cnblogs.com/AdaminXie/tag/%E4%BA%BA%E8%84%B8%E6%A3%80%E6%B5%8B/">人脸检测</a>(4)</li><li><a href="http://www.cnblogs.com/AdaminXie/tag/PTP/">PTP</a>(2)</li><li><a href="http://www.cnblogs.com/AdaminXie/tag/%E7%BD%91%E7%BB%9C%E5%8D%8F%E8%AE%AE/">网络协议</a>(2)</li><li><a href="http://www.cnblogs.com/AdaminXie/tag/IEEE1588/">IEEE1588</a>(2)</li><li><a href="http://www.cnblogs.com/AdaminXie/tag/sklearn/">sklearn</a>(2)</li><li><a href="http://www.cnblogs.com/AdaminXie/tag/%E5%85%89%E7%BD%91%E7%BB%9C/">光网络</a>(1)</li><li><a href="http://www.cnblogs.com/AdaminXie/tag/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>(1)</li><li><a href="http://www.cnblogs.com/AdaminXie/tag/IP/">IP</a>(1)</li><li><a href="http://www.cnblogs.com/AdaminXie/tag/">更多</a></li>
+</ul>
+</div></div><div id="sidebar_categories">
+<div id="sidebar_postcategory" class="catListPostCategory sidebar-block">
+<h3 class="catListTitle">随笔分类</h3>
+
+<ul>
+
+<li><a id="CatList_LinkList_0_Link_0" href="http://www.cnblogs.com/AdaminXie/category/990026.html">IEEE1588(2)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_1" href="http://www.cnblogs.com/AdaminXie/category/1148392.html">Machine Learning(7)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_2" href="http://www.cnblogs.com/AdaminXie/category/1121769.html">Python(7)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_3" href="http://www.cnblogs.com/AdaminXie/category/997787.html">光网络(1)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_4" href="http://www.cnblogs.com/AdaminXie/category/1118212.html">计算机网络</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_5" href="http://www.cnblogs.com/AdaminXie/category/1109486.html">物联网/IoT</a> </li>
+
+</ul>
+
+</div>
+
+<div id="sidebar_postarchive" class="catListPostArchive sidebar-block">
+<h3 class="catListTitle">随笔档案</h3>
+
+<ul>
+
+<li><a id="CatList_LinkList_1_Link_0" href="http://www.cnblogs.com/AdaminXie/archive/2018/02.html">2018年2月 (1)</a> </li>
+
+<li><a id="CatList_LinkList_1_Link_1" href="http://www.cnblogs.com/AdaminXie/archive/2018/01.html">2018年1月 (4)</a> </li>
+
+<li><a id="CatList_LinkList_1_Link_2" href="http://www.cnblogs.com/AdaminXie/archive/2017/12.html">2017年12月 (1)</a> </li>
+
+<li><a id="CatList_LinkList_1_Link_3" href="http://www.cnblogs.com/AdaminXie/archive/2017/11.html">2017年11月 (2)</a> </li>
+
+<li><a id="CatList_LinkList_1_Link_4" href="http://www.cnblogs.com/AdaminXie/archive/2017/05.html">2017年5月 (1)</a> </li>
+
+<li><a id="CatList_LinkList_1_Link_5" href="http://www.cnblogs.com/AdaminXie/archive/2017/04.html">2017年4月 (2)</a> </li>
+
+</ul>
+
+</div>
+
+</div><div id="sidebar_recentcomments" class="sidebar-block"><div id="recent_comments_wrap">
+<div class="catListComment">
+<h3 class="catListTitle">最新评论</h3>
+
+	<div id="RecentCommentsBlock"><ul>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/AdaminXie/p/8472743.html#3912372">1. Re:Python 3 利用 Dlib 19.7 实现摄像头人脸检测特征点标定</a></li>
+        <li class="recent_comment_body">厉害了，博主可以试试在家里安装个人脸识别控制系统，每次回到家的时候都自动开门。</li>
+        <li class="recent_comment_author">--异次元代码</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/AdaminXie/p/8472743.html#3912337">2. Re:Python 3 利用 Dlib 19.7 实现摄像头人脸检测特征点标定</a></li>
+        <li class="recent_comment_body">mark</li>
+        <li class="recent_comment_author">--#天空#</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/AdaminXie/p/8472743.html#3911539">3. Re:Python 3 利用 Dlib 19.7 实现摄像头人脸检测特征点标定</a></li>
+        <li class="recent_comment_body">ff</li>
+        <li class="recent_comment_author">--无名！</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/AdaminXie/p/8379749.html#3900326">4. Re:Python 3 生成手写体数字数据集</a></li>
+        <li class="recent_comment_body">这个扭曲, 还是有点意思的</li>
+        <li class="recent_comment_author">--Little Ming</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/AdaminXie/p/8339863.html#3896801">5. Re:Python 3 利用 Dlib 19.7 实现人脸识别和剪切</a></li>
+        <li class="recent_comment_body">@stoneniqiu不客气，我也刚开始学习，多机会交流...</li>
+        <li class="recent_comment_author">--TimeStamp</li>
+</ul>
+</div>
+</div>
+</div></div><div id="sidebar_topviewedposts" class="sidebar-block"><div id="topview_posts_wrap">
+<div class="catListView">
+<h3 class="catListTitle">阅读排行榜</h3>
+	<div id="TopViewPostsBlock"><ul><li><a href="http://www.cnblogs.com/AdaminXie/p/7905888.html">1. Python 3 利用 Dlib 19.7 进行人脸检测(1287)</a></li><li><a href="http://www.cnblogs.com/AdaminXie/p/8339863.html">2. Python 3 利用 Dlib 19.7 实现人脸检测和剪切(1144)</a></li><li><a href="http://www.cnblogs.com/AdaminXie/p/6754644.html">3. IEEE1588协议简介(1079)</a></li><li><a href="http://www.cnblogs.com/AdaminXie/p/8472743.html">4. Python 3 利用 Dlib 19.7 实现摄像头人脸检测特征点标定(948)</a></li><li><a href="http://www.cnblogs.com/AdaminXie/p/8379749.html">5. Python 3 生成手写体数字数据集(835)</a></li></ul></div>
+</div>
+</div></div><div id="sidebar_topcommentedposts" class="sidebar-block"><div id="topfeedback_posts_wrap">
+<div class="catListFeedback">
+<h3 class="catListTitle">评论排行榜</h3>
+	<div id="TopFeedbackPostsBlock"><ul><li><a href="http://www.cnblogs.com/AdaminXie/p/8339863.html">1. Python 3 利用 Dlib 19.7 实现人脸检测和剪切(5)</a></li><li><a href="http://www.cnblogs.com/AdaminXie/p/8472743.html">2. Python 3 利用 Dlib 19.7 实现摄像头人脸检测特征点标定(3)</a></li><li><a href="http://www.cnblogs.com/AdaminXie/p/8379749.html">3. Python 3 生成手写体数字数据集(1)</a></li></ul></div>
+</div>
+</div></div><div id="sidebar_topdiggedposts" class="sidebar-block"><div id="topdigg_posts_wrap">
+<div class="catListView">
+<h3 class="catListTitle">推荐排行榜</h3>
+<div id="TopDiggPostsBlock"><ul><li><a href="http://www.cnblogs.com/AdaminXie/p/8339863.html">1. Python 3 利用 Dlib 19.7 实现人脸检测和剪切(6)</a></li><li><a href="http://www.cnblogs.com/AdaminXie/p/8472743.html">2. Python 3 利用 Dlib 19.7 实现摄像头人脸检测特征点标定(5)</a></li><li><a href="http://www.cnblogs.com/AdaminXie/p/8379749.html">3. Python 3 生成手写体数字数据集(1)</a></li></ul></div>
+</div></div></div></div><script type="text/javascript">loadBlogSideColumn();</script>
+			</div>
+			
+		</div><!--end: sideBarMain -->
+	</div><!--end: sideBar 侧边栏容器 -->
+	<div class="clear"></div>
+	</div><!--end: main -->
+	<div class="clear"></div>
+	<div id="footer">
+		
+<!--done-->
+Copyright ©2018 TimeStamp
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+
+
+</body></html>
